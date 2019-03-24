@@ -1,0 +1,13 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Users Endpoints
+
+GET     /user-service/api/setup                                         controllers.UsersController.setup
+GET     /user-service/api/users                                         controllers.UsersController.getUsers
+GET     /user-service/api/users/:userId                                 controllers.UsersController.getUserById(userId : Int)
+POST    /user-service/api/users                                         controllers.UsersController.createUser
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
