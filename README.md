@@ -24,7 +24,7 @@ There are four endpoints
 
 /setup :- For setting up all the data
 
-/users :- Fetch all the users
+/users :- Fetch all the users. Whenever a new user is created in the system, it makes a POST call to the notification service which send a welcome user email to the imaginary mail server. 
 
 /users/:userId  :- Fetch user by id
 
