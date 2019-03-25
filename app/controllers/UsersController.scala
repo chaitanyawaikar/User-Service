@@ -18,35 +18,38 @@ class UsersController @Inject()(
 
   def setup: Action[AnyContent] = Action.async { implicit request =>
     service.setup().map { _ =>
-      Ok(Json.toJson("{}"))
+      Ok(Json.toJson(SuccessResponse(OK, SETUP_COMPLETED_SUCCESSFULLY)))
     }
   }
 
   def getUsers: Action[AnyContent] =
     Action.async { implicit request =>
-      service.getAllUsers.map { response =>
-        Ok(Json.toJson(response))
-      }.recover {
-        case _ =>
-          InternalServerError(
-            Json.toJson(ErrorResponse(INTERNAL_SERVER_ERROR,
-              INTERNAL_SERVER_ERROR_MSG)))
-      }
+      service.getAllUsers
+        .map { response =>
+          Ok(Json.toJson(response))
+        }
+        .recover {
+          case _ =>
+            InternalServerError(Json.toJson(
+              ErrorResponse(INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MSG)))
+        }
     }
 
   def getUserById(id: Int): Action[AnyContent] =
     Action.async { implicit request =>
-      service.getUserById(id).map {
-        case Right(data) =>
-          Ok(Json.toJson(data))
-        case Left(error) =>
-          NotFound(Json.toJson(ErrorResponse(NOT_FOUND, error.errorMessage)))
-      }.recover {
-        case _ =>
-          InternalServerError(
-            Json.toJson(ErrorResponse(INTERNAL_SERVER_ERROR,
-              INTERNAL_SERVER_ERROR_MSG)))
-      }
+      service
+        .getUserById(id)
+        .map {
+          case Right(data) =>
+            Ok(Json.toJson(data))
+          case Left(error) =>
+            NotFound(Json.toJson(ErrorResponse(NOT_FOUND, error.errorMessage)))
+        }
+        .recover {
+          case _ =>
+            InternalServerError(Json.toJson(
+              ErrorResponse(INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MSG)))
+        }
     }
 
   def createUser: Action[JsValue] = Action.async(parse.json) { request =>
