@@ -37,7 +37,7 @@ class UserService @Inject()(
     }
   }
 
-  def getAllUsers: Future[Seq[User]] = usersRepository.getAllUsers()
+  def getAllUsers: Future[Seq[User]] = usersRepository.getAllUsers
 
   def getUserById(id: Int): Future[Either[ErrorMessage, User]] = {
     usersRepository.getUserById(id).map { users =>
