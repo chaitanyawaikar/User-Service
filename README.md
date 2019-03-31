@@ -35,5 +35,3 @@ POST /user :- To create a new user
 Unit test cases missing for user repository
 
 End to end test remaining for the application
-
-Input parameter validation missing for create user endpoint. Currently there is no validation in place to check the user input parameters. Best solution is to use Cats for IO Validation
