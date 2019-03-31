@@ -61,8 +61,8 @@ class UsersController @Inject()(
           .map {
             case Right(msg) =>
               Ok(Json.toJson(SuccessResponse(OK, msg)))
-            case Left(errormsg: String) =>
-              Conflict(Json.toJson(ErrorResponse(CONFLICT, errormsg)))
+            case Left(errorMessages: Seq[String]) =>
+              Conflict(Json.toJson(errorMessages.map(ErrorResponse(CONFLICT, _))))
           }
           .recover {
             case _ =>

@@ -6,6 +6,7 @@ import models.{ErrorMessage, User, UsersRequest}
 import play.api.libs.ws.WSClient
 import repository.UsersRepository
 import utils.Constants._
+import utils.RichValidator._
 import utils.SetupData.setupData
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,24 +17,27 @@ class UserService @Inject()(
     notificationServiceGateway: NotificationServiceGateway)(
     implicit ec: ExecutionContext) {
 
-  def createUser(user: UsersRequest,
-                 ws: WSClient): Future[Either[String, String]] = {
-
-    usersRepository.checkIfUserExists(user).flatMap { users =>
-      if (users.nonEmpty) {
-        Future.successful(Left(USER_ALREADY_EXISTS))
-      } else {
-        usersRepository
-          .createUser(user.sureName,
-                      user.firstName,
-                      user.gender,
-                      user.email,
-                      user.subscribedNewsletter)
-          .map { u: User =>
-            notificationServiceGateway.sendWelcomeEmail(ws, u)
-            Right(USER_CREATED_SUCCESSFULLY + u.id)
+  def createUser(user: UsersRequest, ws: WSClient): Future[Either[Seq[String], String]] = {
+    user.validateParams match {
+      case h :: t =>
+        Future.successful(Left((h :: t).map(_.left.get).map(_.toString)))
+      case _ =>
+        usersRepository.checkIfUserExists(user).flatMap { users =>
+          if (users.nonEmpty) {
+            Future.successful(Left(Seq(USER_ALREADY_EXISTS)))
+          } else {
+            usersRepository
+              .createUser(user.sureName,
+                          user.firstName,
+                          user.gender,
+                          user.email,
+                          user.subscribedNewsletter)
+              .map { u: User =>
+                notificationServiceGateway.sendWelcomeEmail(ws, u)
+                Right(USER_CREATED_SUCCESSFULLY + u.id)
+              }
           }
-      }
+        }
     }
   }
 

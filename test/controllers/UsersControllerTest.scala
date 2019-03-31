@@ -101,7 +101,7 @@ class UsersControllerTest
       val fakeRequest = FakeRequest(POST, "/user-service/api/users").withBody(Json.toJson(userRequest))
 
       when(mockService.createUser(any(),any()))
-        .thenReturn(Future.successful(Left(USER_ALREADY_EXISTS)))
+        .thenReturn(Future.successful(Left(Seq(USER_ALREADY_EXISTS))))
 
       val futureResult: Future[Result] = route(application, fakeRequest).get
       status(futureResult) mustBe 409

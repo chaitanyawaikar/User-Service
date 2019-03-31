@@ -5,7 +5,7 @@ import config.TestUtil._
 import controllers.UsersController
 import fixtures.UsersFixture._
 import gateway.NotificationServiceGateway
-import models.{ErrorMessage, UsersRequest}
+import models.{ErrorMessage, InvalidGender, InvalidNameFormat, UsersRequest}
 import org.mockito.Mockito._
 import play.api.libs.ws.WSClient
 import repository.UsersRepository
@@ -61,19 +61,43 @@ class UserServiceTest extends BaseTest {
   test(
     "should not create user if a user already exists with the given email id") {
     val userRequest =
-      UsersRequest("Turner", "Tom", "male", "tom.turner@provider.de", subscribedNewsletter = true)
+      UsersRequest("Turner",
+                   "Tom",
+                   "male",
+                   "tom.turner@provider.de",
+                   subscribedNewsletter = true)
     when(usersRepository.checkIfUserExists(userRequest))
       .thenReturn(Future.successful(users))
 
     val result = userService.createUser(userRequest, wsClient).await
 
-    result.left.get shouldBe USER_ALREADY_EXISTS
+    result.left.get shouldBe List(USER_ALREADY_EXISTS)
+
+  }
+
+  test("should not create user when parameters validation fails") {
+    val userRequest =
+      UsersRequest("",
+                   "Tom",
+                   "1male",
+                   "tom.turner@provider.de",
+                   subscribedNewsletter = true)
+    when(usersRepository.checkIfUserExists(userRequest))
+      .thenReturn(Future.successful(users))
+
+    val result = userService.createUser(userRequest, wsClient).await
+
+    result.left.get shouldBe List(InvalidNameFormat.toString,InvalidGender.toString)
 
   }
 
   test("should create user if user does not exist") {
     val userRequest =
-      UsersRequest("Turner", "Tom", "male", "tom.turner@provider.de", subscribedNewsletter = true)
+      UsersRequest("Turner",
+                   "Tom",
+                   "male",
+                   "tom.turner@provider.de",
+                   subscribedNewsletter = true)
     when(usersRepository.checkIfUserExists(userRequest))
       .thenReturn(Future.successful(Seq()))
     when(
